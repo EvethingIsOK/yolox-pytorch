@@ -8,7 +8,8 @@ import torch.nn as nn
 from PIL import ImageDraw, ImageFont
 
 from nets.yolo import YoloBody
-from utils.utils import cvtColor, get_classes, preprocess_input, resize_image
+from utils.utils import (cvtColor, get_classes, preprocess_input, resize_image,
+                         show_config)
 from utils.utils_bbox import decode_outputs, non_max_suppression
 
 '''
@@ -24,8 +25,8 @@ class YOLO(object):
         #   验证集损失较低不代表mAP较高，仅代表该权值在验证集上泛化性能较好。
         #   如果出现shape不匹配，同时要注意训练时的model_path和classes_path参数的修改
         #--------------------------------------------------------------------------#
-        "model_path"        : 'logs/ep290-loss2.794-val_loss4.612.pth',
-        "classes_path"      : 'model_data/voc_classes.txt',
+        "model_path"        : 'model_data/yolox_s.pth',
+        "classes_path"      : 'model_data/coco_classes.txt',
         #---------------------------------------------------------------------#
         #   输入图片的大小，必须为32的倍数。
         #---------------------------------------------------------------------#
@@ -33,7 +34,7 @@ class YOLO(object):
         #---------------------------------------------------------------------#
         #   所使用的YoloX的版本。nano、tiny、s、m、l、x
         #---------------------------------------------------------------------#
-        "phi"               : 'l',
+        "phi"               : 's',
         #---------------------------------------------------------------------#
         #   只有得分大于置信度的预测框会被保留下来
         #---------------------------------------------------------------------#
@@ -81,6 +82,8 @@ class YOLO(object):
         self.colors = list(map(lambda x: colorsys.hsv_to_rgb(*x), hsv_tuples))
         self.colors = list(map(lambda x: (int(x[0] * 255), int(x[1] * 255), int(x[2] * 255)), self.colors))
         self.generate()
+        
+        show_config(**self._defaults)
 
     #---------------------------------------------------#
     #   生成模型
